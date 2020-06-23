@@ -262,7 +262,7 @@ validate_assertion(Xml, DuplicateFun, SP = #esaml_sp{}) ->
         fun(A) ->
             if
                 SP#esaml_sp.idp_signs_envelopes ->
-                    case xmerl_dsig:verify(Xml, SP#esaml_sp.trusted_fingerprints) of
+                    case xmerl_dsig:verify(A, SP#esaml_sp.trusted_fingerprints) of
                         ok -> A;
                         OuterError -> {error, {envelope, OuterError}}
                     end;
@@ -315,12 +315,6 @@ decrypt_key_info(EncryptedData, Key) ->
     CipherValue = base64:decode(CipherValue64),
     decrypt(CipherValue, Algorithm, Key).
 
-decrypt(CipherValue, "http://www.w3.org/2001/04/xmlenc#rsa-1_5", Key) ->
-    Opts = [
-        {rsa_padding, rsa_pkcs1_padding},
-        {rsa_pad, rsa_pkcs1_padding}
-    ],
-    public_key:decrypt_private(CipherValue, Key, Opts);
 
 decrypt(CipherValue, "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", Key) ->
     Opts = [
